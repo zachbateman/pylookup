@@ -1,0 +1,25 @@
+import setuptools
+
+with open('README.md', 'r') as f:
+    long_description = f.read()
+
+setuptools.setup(
+    name='PyLookup',
+    version='0.1.0',
+    packages=['pylookup'],
+    license='MIT',
+    author='Zach Bateman',
+    description='PyLookupEasy Python database interaction',
+    long_description=long_description,
+    long_description_content_type='text/markdown',
+    url='https://github.com/zachbateman/pylookup.git',
+    download_url='https://github.com/zachbateman/pylookup/archive/v_0.1.0.tar.gz',
+    keywords=['LOOKUP', 'VLOOKUP', 'TABLE', 'MATCHING'],
+    install_requires=['fuzzywuzzy', 'pandas'],
+    classifiers=['Development Status :: 3 - Alpha',
+                   'License :: OSI Approved :: MIT License',
+                   'Programming Language :: Python :: 3',
+                   'Programming Language :: Python :: 3.7',
+                   'Programming Language :: Python :: 3.8',
+                   ]
+)
