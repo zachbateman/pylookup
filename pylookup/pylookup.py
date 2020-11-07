@@ -26,21 +26,7 @@ def pylookup(column_to_fill: str, main_table, reference_table, *args, force_name
         closest_column = column_to_fill
 
     # check for reference columns that can link with other columns in main
-    main_match_cols = set(col for col in main_table.columns) # if col != closest_column)
-    main_col_matches = defaultdict(list)
-
-    for main_col in main_match_cols:
-        main_vals = main_table[main_col].tolist()
-        for ref_col in reference_table.columns:
-            ref_vals = [str(x) for x in reference_table[ref_col].tolist()]
-
-            best_match_scores = sorted([process.extract(str(main_val), ref_vals, limit=1)[0][1] for main_val in main_vals], reverse=True)
-            if mean(best_match_scores[:3]) > 90:
-                main_col_matches[main_col].append(ref_col)
-    pp(main_col_matches)
-    if not main_col_matches:
-        print('No reference columns were found suitable for matching!')
-    pp(main_col_matches)
+    main_col_matches = matchable_columns(main_table, reference_table)
 
     # iterate over main and set value of column_to_fill based on best match from reference
     new_values = []
@@ -59,7 +45,6 @@ def pylookup(column_to_fill: str, main_table, reference_table, *args, force_name
                     for index in [i for i, val in enumerate(ref_vals) if val == closest_matches[0][0]]:
                         match_row_counts[index] += 1
 
-        # pp(match_row_counts)
         max_count = max(match_row_counts.values())
         match_indexes = sorted(set(i for i, count in match_row_counts.items() if count == max_count))
         if len(match_indexes) == 1:
@@ -79,7 +64,6 @@ def pylookup(column_to_fill: str, main_table, reference_table, *args, force_name
     main_table[closest_column if closest_column else column_to_fill] = new_values
 
 
-
 def column_check(column, table) -> str:
     '''
     Check for column or close match in table.
@@ -89,9 +73,27 @@ def column_check(column, table) -> str:
         return column
 
     closest = process.extract(column, table.columns, limit=1)[0]
-    print(closest)
     if closest[1] > 90:
         print(f'Column {column} matched to {closest[0]}')
         return closest[0]
     else:
         return ''
+
+
+def matchable_columns(main_table, reference_table) -> dict:
+    '''
+    Determine which ref columns can help tie to each main column (if possible).
+    '''
+    main_col_matches = defaultdict(list)
+    for main_col in main_table.columns:
+        main_vals = main_table[main_col].tolist()
+        for ref_col in reference_table.columns:
+            ref_vals = [str(x) for x in reference_table[ref_col].tolist()]
+            best_match_scores = sorted([process.extract(str(main_val), ref_vals, limit=1)[0][1] for main_val in main_vals], reverse=True)
+            if mean(best_match_scores[:3]) > 90 or best_match_scores[0] > 97:
+                main_col_matches[main_col].append(ref_col)
+
+    pp(main_col_matches)
+    if not main_col_matches:
+        print('No reference columns were found suitable for matching!')
+    return main_col_matches
