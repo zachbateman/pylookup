@@ -7,16 +7,20 @@ import pandas
 
 class TestLookup(unittest.TestCase):
 
-    def add_matched_column(self):
+    def test_add_matched_column(self):
         main = pandas.read_csv('main_table.csv')
         reference = pandas.read_csv('reference_table.csv')
 
-        pylookup('TYPE', main, reference)
+        print(main)
 
-        self.assertTrue(...)
+        pylookup.pylookup('TYPE', main, reference)
+        pylookup.pylookup('ANIMAL2', main, reference, force_name=True)
+
+        print(main)
+        self.assertTrue(True)
 
 
 
 
 if __name__ == '__main__':
-    unittest.main(buffer=True)
+    unittest.main(buffer=False)
