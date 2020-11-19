@@ -1,6 +1,6 @@
 # PyLookup
 
-PyLookup is fuzzy-matching command-line tool and library inspired by the "VLOOKUP" function in Excel.
+PyLookup is a fuzzy-matching, auto-updating library and command-line tool inspired by the "VLOOKUP" function in Excel.
 
 
 

@@ -5,7 +5,6 @@ from fuzzywuzzy import fuzz, process
 import pandas
 from statistics import mean
 from collections import defaultdict
-from pprint import pprint as pp
 
 
 
@@ -15,7 +14,7 @@ def pylookup(column_to_fill: str, main_table, reference_table, *args, force_name
     based on data matched from the "reference_table" arg.
     Modifies "main_table" in place.
 
-    For initial development, assuming tables are provided as dataframes.
+    For initial development, assuming tables are provided as Pandas DataFrames.
     Ideally extend to other non-pandas data formats in the future.
     '''
 
@@ -31,7 +30,7 @@ def pylookup(column_to_fill: str, main_table, reference_table, *args, force_name
     # iterate over main and set value of column_to_fill based on best match from reference
     new_values = []
     for i, row in main_table.iterrows():
-        match_row_counts = {r: 0.0 for r in range(len(reference_table))}
+        match_row_counts = defaultdict(int)
         for main_col, match_ref_columns in main_col_matches.items():
             main_val = row[main_col]
             for ref_col in match_ref_columns:
@@ -57,10 +56,8 @@ def pylookup(column_to_fill: str, main_table, reference_table, *args, force_name
             match_val = match_vals[0]
         else:
             match_val = None
-
         new_values.append(match_val)
 
-    print(new_values)
     main_table[closest_column if closest_column else column_to_fill] = new_values
 
 
@@ -92,8 +89,6 @@ def matchable_columns(main_table, reference_table) -> dict:
             best_match_scores = sorted([process.extract(str(main_val), ref_vals, limit=1)[0][1] for main_val in main_vals], reverse=True)
             if mean(best_match_scores[:3]) > 90 or best_match_scores[0] > 97:
                 main_col_matches[main_col].append(ref_col)
-
-    pp(main_col_matches)
     if not main_col_matches:
         print('No reference columns were found suitable for matching!')
     return main_col_matches

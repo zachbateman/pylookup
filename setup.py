@@ -9,7 +9,7 @@ setuptools.setup(
     packages=['pylookup'],
     license='MIT',
     author='Zach Bateman',
-    description='PyLookupEasy Python database interaction',
+    description='PyLookup - Fuzzy-matching table autofill tool',
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/zachbateman/pylookup.git',
