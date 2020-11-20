@@ -81,16 +81,22 @@ def matchable_columns(main_table, reference_table) -> dict:
     '''
     Determine which ref columns can help tie to each main column (if possible).
     '''
+    # pre-loaded dictionary of sets for reference columns avoids .tolist() more than once
+    # set allows for fast check of exact match and works with process.extract
+    reference_column_values = {ref_col: set(str(x) for x in reference_table[ref_col].tolist()) for ref_col in reference_table.columns}
     main_col_matches = defaultdict(list)
     for main_col in main_table.columns:
         main_vals = [str(x) for x in main_table[main_col].tolist()]
         for ref_col in reference_table.columns:
-            ref_vals = [str(x) for x in reference_table[ref_col].tolist()]
+            ref_vals = reference_column_values[ref_col]
             scores = []
-            for main_val in random.sample(main_vals, 30) if len(main_vals) > 30 else main_vals:
+            for main_val in random.sample(main_vals, 30) if len(main_vals) > 30 else main_vals:  # sample to improve speed
+                if main_val in ref_vals:  # early exit if a perfect match is in ref_vals
+                    main_col_matches[main_col].append(ref_col)
+                    break
                 score = process.extract(main_val, ref_vals, limit=1)[0][1]
                 scores = sorted((score, *scores), reverse=True)
-                if score > 97 or mean(scores[:3]) > 90:
+                if score > 97 or mean(scores[:3]) > 90:  # exit as soon as a good or reasonably good matches are found
                     main_col_matches[main_col].append(ref_col)
                     break
     if not main_col_matches:
