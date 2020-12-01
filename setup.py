@@ -15,11 +15,12 @@ setuptools.setup(
     url='https://github.com/zachbateman/pylookup.git',
     download_url='https://github.com/zachbateman/pylookup/archive/v_0.1.0.tar.gz',
     keywords=['LOOKUP', 'VLOOKUP', 'TABLE', 'MATCHING'],
-    install_requires=['fuzzywuzzy', 'pandas'],
+    install_requires=['rapidfuzz', 'pandas'],
     classifiers=['Development Status :: 3 - Alpha',
                    'License :: OSI Approved :: MIT License',
                    'Programming Language :: Python :: 3',
                    'Programming Language :: Python :: 3.7',
                    'Programming Language :: Python :: 3.8',
+                   'Programming Language :: Python :: 3.9',
                    ]
 )

@@ -1,2 +1,2 @@
-fuzzywuzzy>=0.18.0
+rapidfuzz>=0.13.0
 pandas>=1.0.0

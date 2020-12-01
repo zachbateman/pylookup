@@ -1,7 +1,7 @@
 '''
 PyLookup module designed for simple, intelligent matching and populating between two tables.
 '''
-from fuzzywuzzy import fuzz, process
+from rapidfuzz import fuzz, process
 import pandas
 from statistics import mean
 from collections import defaultdict
@@ -27,6 +27,8 @@ def pylookup(column_to_fill: str, main_table, reference_table, *args, force_name
     # check for reference columns that can link with other columns in main
     main_col_matches = matchable_columns(main_table, reference_table)
 
+    # pre-loaded dictionary of sets for reference columns avoids .tolist() more than once
+    reference_column_values = {ref_col: [str(x) for x in reference_table[ref_col].tolist()] for ref_col in reference_table.columns}
     # iterate over main and set value of column_to_fill based on best match from reference
     new_values = []
     for i, row in main_table.iterrows():
@@ -34,18 +36,25 @@ def pylookup(column_to_fill: str, main_table, reference_table, *args, force_name
         for main_col, match_ref_columns in main_col_matches.items():
             main_val = row[main_col]
             for ref_col in match_ref_columns:
-                ref_vals = reference_table[ref_col].tolist()
-                closest_matches = [t for t in process.extract(main_val, ref_vals, limit=3) if t[1] > 80]
+                ref_vals = reference_column_values[ref_col]
+                try:
+                    closest_matches = [t for t in process.extract(main_val, ref_vals, limit=3) if t[1] > 80]
+                except TypeError:
+                    closest_matches = []
 
-                for index in [i for i, val in enumerate(ref_vals) if val in [t[0] for t in closest_matches]]:
+                for index in [i for i, val in enumerate(ref_vals) if val in set(t[0] for t in closest_matches)]:
                     match_row_counts[index] += 1
 
                 if len(closest_matches) > 1 and closest_matches[0][1] - closest_matches[1][1] > 5 and closest_matches[0][1] > 95:
                     for index in [i for i, val in enumerate(ref_vals) if val == closest_matches[0][0]]:
                         match_row_counts[index] += 1
 
-        max_count = max(match_row_counts.values())
-        match_indexes = sorted(set(i for i, count in match_row_counts.items() if count == max_count))
+        if len(match_row_counts) > 0:
+            max_count = max(match_row_counts.values())
+            match_indexes = sorted(set(i for i, count in match_row_counts.items() if count == max_count))
+        else:
+            match_indexes = []
+
         if len(match_indexes) == 1:
             match_index = match_indexes[0]
             match_val = reference_table.iloc[match_index][column_to_fill]
@@ -85,16 +94,20 @@ def matchable_columns(main_table, reference_table) -> dict:
     # set allows for fast check of exact match and works with process.extract
     reference_column_values = {ref_col: set(str(x) for x in reference_table[ref_col].tolist()) for ref_col in reference_table.columns}
     main_col_matches = defaultdict(list)
+    main_sample = main_table.sample(n=30, random_state=1)  # random state for reproducability
     for main_col in main_table.columns:
-        main_vals = [str(x) for x in main_table[main_col].tolist()]
+        main_vals = [str(x) for x in main_sample[main_col].tolist()]
         for ref_col in reference_table.columns:
             ref_vals = reference_column_values[ref_col]
             scores = []
-            for main_val in random.sample(main_vals, 30) if len(main_vals) > 30 else main_vals:  # sample to improve speed
+            for main_val in main_vals:  # sampled above to improve speed
                 if main_val in ref_vals:  # early exit if a perfect match is in ref_vals
                     main_col_matches[main_col].append(ref_col)
                     break
-                score = process.extract(main_val, ref_vals, limit=1)[0][1]
+                try:
+                    score = process.extract(main_val, ref_vals, limit=1)[0][1]
+                except TypeError:
+                    score = 0
                 scores = sorted((score, *scores), reverse=True)
                 if score > 97 or mean(scores[:3]) > 90:  # exit as soon as a good or reasonably good matches are found
                     main_col_matches[main_col].append(ref_col)
