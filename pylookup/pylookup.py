@@ -94,7 +94,10 @@ def matchable_columns(main_table, reference_table) -> dict:
     # set allows for fast check of exact match and works with process.extract
     reference_column_values = {ref_col: set(str(x) for x in reference_table[ref_col].tolist()) for ref_col in reference_table.columns}
     main_col_matches = defaultdict(list)
-    main_sample = main_table.sample(n=30, random_state=1)  # random state for reproducability
+    if len(main_table) > 30:
+        main_sample = main_table.sample(n=30, random_state=1)  # random state for reproducability
+    else:
+        main_sample = main_table
     for main_col in main_table.columns:
         main_vals = [str(x) for x in main_sample[main_col].tolist()]
         for ref_col in reference_table.columns:
