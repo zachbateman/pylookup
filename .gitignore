@@ -2,6 +2,7 @@ __pycache__/
 *.pyc
 .mypy_cache/
 _Archive/
+PyLookup.egg-info/
 
 build/
 dist/
