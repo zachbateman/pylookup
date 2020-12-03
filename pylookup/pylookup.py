@@ -27,6 +27,7 @@ def pylookup(column_to_fill: str, main_table, reference_table, *args, force_name
     # check for reference columns that can link with other columns in main
     main_col_matches = matchable_columns(main_table, reference_table)
 
+    print('Populating column...')
     # pre-loaded dictionary of sets for reference columns avoids .tolist() more than once
     reference_column_values = {ref_col: [str(x) for x in reference_table[ref_col].tolist()] for ref_col in reference_table.columns}
     # iterate over main and set value of column_to_fill based on best match from reference
@@ -67,7 +68,9 @@ def pylookup(column_to_fill: str, main_table, reference_table, *args, force_name
             match_val = None
         new_values.append(match_val)
 
-    main_table[closest_column if closest_column else column_to_fill] = new_values
+    column = closest_column if closest_column else column_to_fill
+    main_table[column] = new_values
+    print(f'main_table now has updated column {column}')
 
 
 def column_check(column, table) -> str:
@@ -90,6 +93,7 @@ def matchable_columns(main_table, reference_table) -> dict:
     '''
     Determine which ref columns can help tie to each main column (if possible).
     '''
+    print('Determining matchable columns...')
     # pre-loaded dictionary of sets for reference columns avoids .tolist() more than once
     # set allows for fast check of exact match and works with process.extract
     reference_column_values = {ref_col: set(str(x) for x in reference_table[ref_col].tolist()) for ref_col in reference_table.columns}
