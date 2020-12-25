@@ -10,7 +10,7 @@ import click
 
 
 
-def pylookup(column_to_fill: str, main_table, reference_table, *args, force_name: bool=False, **kwargs) -> None:
+def pylookup(column_to_fill: str, main_table, reference_table, *args, force_name: bool=False, main_cols_for_matching=None, **kwargs) -> None:
     '''
     Main function that handles filling a column of the "main_table" arg
     based on data matched from the "reference_table" arg.
@@ -26,7 +26,7 @@ def pylookup(column_to_fill: str, main_table, reference_table, *args, force_name
         closest_column = column_to_fill
 
     # check for reference columns that can link with other columns in main
-    main_col_matches = matchable_columns(main_table, reference_table)
+    main_col_matches = matchable_columns(main_table, reference_table, main_cols_for_matching)
 
     print('Populating column...')
     # pre-loaded dictionary of sets for reference columns avoids .tolist() more than once
@@ -90,20 +90,21 @@ def column_check(column, table) -> str:
         return ''
 
 
-def matchable_columns(main_table, reference_table) -> dict:
+def matchable_columns(main_table, reference_table, main_cols_for_matching) -> dict:
     '''
     Determine which ref columns can help tie to each main column (if possible).
     '''
-    print('Determining matchable columns...')
+    if not main_cols_for_matching:
+        main_cols_for_matching = set(main_table.columns)
     # pre-loaded dictionary of sets for reference columns avoids .tolist() more than once
     # set allows for fast check of exact match and works with process.extract
     reference_column_values = {ref_col: set(str(x) for x in reference_table[ref_col].tolist()) for ref_col in reference_table.columns}
     main_col_matches = defaultdict(list)
     if len(main_table) > 30:
-        main_sample = main_table.sample(n=30, random_state=1)  # random state for reproducability
+        main_sample = main_table.sample(n=30, random_state=1)  # random state for reproducibility
     else:
         main_sample = main_table
-    for main_col in main_table.columns:
+    for main_col in [col for col in main_table.columns if col in main_cols_for_matching]:
         main_vals = [str(x) for x in main_sample[main_col].tolist()]
         for ref_col in reference_table.columns:
             ref_vals = reference_column_values[ref_col]
