@@ -39,18 +39,21 @@ def pylookup(column_to_fill: str, main_table, reference_table, *args, force_name
             main_val = row[main_col]
             for ref_col in match_ref_columns:
                 ref_vals = reference_column_values[ref_col]
+
+                for i, val in enumerate(ref_vals):
+                    if val in main_val:
+                        match_row_counts[i] += 0.1
+
                 try:
-                    closest_matches = [t for t in process.extract(main_val, ref_vals, limit=3) if t[1] > 80]
+                    closest_matches = [t for t in process.extract(main_val, ref_vals, limit=3) if t[1] > 50]
+                    closest_match_scores = {t[0]: t[1] for t in closest_matches}
+                    # loop adds 1 if score is 50 and 2 if score is 100 with a linear scale in between
+                    for index, val in [(i, val) for i, val in enumerate(ref_vals) if val in set(t[0] for t in closest_matches)]:
+                        match_row_counts[index] += closest_match_scores[val] / 50
                 except TypeError:
                     closest_matches = []
 
-                for index in [i for i, val in enumerate(ref_vals) if val in set(t[0] for t in closest_matches)]:
-                    match_row_counts[index] += 1
-
-                if len(closest_matches) > 1 and closest_matches[0][1] - closest_matches[1][1] > 5 and closest_matches[0][1] > 95:
-                    for index in [i for i, val in enumerate(ref_vals) if val == closest_matches[0][0]]:
-                        match_row_counts[index] += 1
-
+        # now that best row counts are determined, assign best possible matched value
         if len(match_row_counts) > 0:
             max_count = max(match_row_counts.values())
             match_indexes = sorted(set(i for i, count in match_row_counts.items() if count == max_count))
@@ -118,7 +121,7 @@ def matchable_columns(main_table, reference_table, main_cols_for_matching) -> di
                 except TypeError:
                     score = 0
                 scores = sorted((score, *scores), reverse=True)
-                if score > 97 or mean(scores[:3]) > 90:  # exit as soon as a good or reasonably good matches are found
+                if score > 97 or mean(scores[:3]) > 85:  # exit as soon as a good or reasonably good matches are found
                     main_col_matches[main_col].append(ref_col)
                     break
     if not main_col_matches:
