@@ -1,29 +1,29 @@
 '''
 PyLookup module designed for simple, intelligent matching and populating between two tables.
 '''
-from rapidfuzz import fuzz, process
+from typing import Union
+from rapidfuzz import process
 import pandas
 from statistics import mean
 from collections import defaultdict
-import random
+import copy
 import click
 
 
 
-def pylookup(column_to_fill: str, main_table, reference_table, *args, force_name: bool=False, main_cols_for_matching=None, **kwargs) -> None:
+def pylookup(column_to_fill: str, main_table, reference_table, *args, force_name: bool=False, main_cols_for_matching=None, inplace=False, **kwargs) -> Union[None, pandas.DataFrame]:
     '''
     Main function that handles filling a column of the "main_table" arg
     based on data matched from the "reference_table" arg.
-    Modifies "main_table" in place.
+
+    Returns modified "main_table" by default.
+    Can specify inplace=True to modify main_table in place instead of returning a modified copy.
 
     For initial development, assuming tables are provided as Pandas DataFrames.
     Ideally extend to other non-pandas data formats in the future.
     '''
     # check if column is in main
-    if not force_name:
-        closest_column = column_check(column_to_fill, main_table)
-    else:
-        closest_column = column_to_fill
+    closest_column = column_check(column_to_fill, main_table) if not force_name else column_to_fill
 
     # check for reference columns that can link with other columns in main
     main_col_matches = matchable_columns(main_table, reference_table, main_cols_for_matching)
@@ -73,8 +73,14 @@ def pylookup(column_to_fill: str, main_table, reference_table, *args, force_name
         new_values.append(match_val)
 
     column = closest_column if closest_column else column_to_fill
-    main_table[column] = new_values
-    print(f'main_table now has updated column {column}')
+    if inplace:
+        main_table[column] = new_values
+        print(f'main_table now has updated column {column}')
+    else:
+        new_main = copy.deepcopy(main_table)
+        new_main[column] = new_values
+        return new_main
+
 
 
 def column_check(column, table) -> str:
@@ -133,7 +139,7 @@ def matchable_columns(main_table, reference_table, main_cols_for_matching) -> di
 @click.argument('column_to_fill')
 @click.argument('main_file')
 @click.argument('reference_file')
-def file_lookup(column_to_fill, main_file, reference_file):
+def file_lookup(column_to_fill, main_file, reference_file) -> None:
 
     if '.xl' in main_file:
         main_df = pandas.read_excel(main_file)
@@ -150,7 +156,7 @@ def file_lookup(column_to_fill, main_file, reference_file):
         print('Error!  Reference file must be .csv or .xlsx!')
 
 
-    pylookup(column_to_fill, main_df, ref_df)
+    pylookup(column_to_fill, main_df, ref_df, inplace=True)
 
     if '.xl' in main_file:
         main_df.to_excel(main_file, index=False)
