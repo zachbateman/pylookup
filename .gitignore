@@ -6,3 +6,5 @@ PyLookup.egg-info/
 
 build/
 dist/
+
+*.prof

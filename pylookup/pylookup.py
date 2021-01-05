@@ -2,9 +2,8 @@
 PyLookup module designed for simple, intelligent matching and populating between two tables.
 '''
 from typing import Union
-from rapidfuzz import process
+from rapidfuzz import fuzz, process
 import pandas
-from statistics import mean
 from collections import defaultdict
 import copy
 import click
@@ -123,11 +122,12 @@ def matchable_columns(main_table, reference_table, main_cols_for_matching) -> di
                     main_col_matches[main_col].append(ref_col)
                     break
                 try:
-                    score = process.extract(main_val, ref_vals, limit=1)[0][1]
+                    score = process.extractOne(main_val, ref_vals, scorer=fuzz.QRatio)[1]  # fuzz.QRatio appears faster than default fuzz.WRatio
                 except TypeError:
                     score = 0
                 scores = sorted((score, *scores), reverse=True)
-                if score > 97 or mean(scores[:3]) > 85:  # exit as soon as a good or reasonably good matches are found
+                # Second conditional of next statement is a faster version instead of mean(scores[:3]) > 85... not the exact same, but close enough for this check
+                if score > 97 or (len(scores) > 2 and (scores[0] + scores[2]) / 2 > 85):  # exit as soon as a good or reasonably good matches are found
                     main_col_matches[main_col].append(ref_col)
                     break
     if not main_col_matches:
