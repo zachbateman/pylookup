@@ -40,8 +40,13 @@ def pylookup(column_to_fill: str, main_table, reference_table, *args, force_name
                 ref_vals = reference_column_values[ref_col]
 
                 for i, val in enumerate(ref_vals):
-                    if val in main_val:
-                        match_row_counts[i] += 0.1
+                    try:
+                        if val == main_val:
+                            match_row_counts[i] += 0.5
+                        elif val in main_val:
+                            match_row_counts[i] += 0.1
+                    except TypeError:  # may trigger if val is a number for instance
+                        pass
 
                 try:
                     closest_matches = [t for t in process.extract(main_val, ref_vals, limit=3) if t[1] > 50]

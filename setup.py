@@ -5,7 +5,7 @@ with open('README.md', 'r') as f:
 
 setuptools.setup(
     name='PyLookup',
-    version='0.1.2',
+    version='0.1.3',
     packages=['pylookup'],
     license='MIT',
     author='Zach Bateman',
@@ -13,7 +13,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/zachbateman/pylookup.git',
-    download_url='https://github.com/zachbateman/pylookup/archive/v_0.1.2.tar.gz',
+    download_url='https://github.com/zachbateman/pylookup/archive/v_0.1.3.tar.gz',
     keywords=['LOOKUP', 'VLOOKUP', 'TABLE', 'MATCHING'],
     install_requires=['rapidfuzz', 'pandas', 'click'],
     classifiers=['Development Status :: 3 - Alpha',
@@ -22,5 +22,6 @@ setuptools.setup(
                    'Programming Language :: Python :: 3.7',
                    'Programming Language :: Python :: 3.8',
                    'Programming Language :: Python :: 3.9',
+                   'Programming Language :: Python :: 3.10',
                    ]
 )
