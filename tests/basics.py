@@ -12,8 +12,8 @@ class TestLookup(unittest.TestCase):
         reference = pandas.read_csv('reference_table.csv')
 
         print(main)
-        main = pylookup.pylookup('TYPE', main, reference)
-        main = pylookup.pylookup('ANIMAL2', main, reference, force_name=True)
+        main = pylookup.pylookup('TYPE', reference, main)
+        main = pylookup.pylookup('ANIMAL2', reference, main, force_name=True)
         print(main)
 
         self.assertTrue('TYPE' in main.columns and 'ANIMAL2' in main.columns)

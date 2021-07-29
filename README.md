@@ -12,10 +12,10 @@ pip install pylookup
 # Command Line Interface Usage
 
  - To add and populate the "COLUMN" column in "excel_to_populate" from the data in "excel_with_column",
- simple run the following command.  This currently works for .xlsx (Excel) files and .csv files.
+ simply run the following command.  This currently works for .xlsx (Excel) files and .csv files.
 
 ```
-pylookup COLUMN excel_to_populate.xlsx excel_with_column.xlsx
+pylookup COLUMN excel_with_column.xlsx excel_to_populate.xlsx
 ```
 
 

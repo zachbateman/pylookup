@@ -10,7 +10,7 @@ import click
 
 
 
-def pylookup(column_to_fill: str, main_table, reference_table, *args, force_name: bool=False, main_cols_for_matching=None, inplace=False, **kwargs) -> Union[None, pandas.DataFrame]:
+def pylookup(column_to_fill: str, reference_table, main_table, *args, force_name: bool=False, main_cols_for_matching=None, inplace=False, **kwargs) -> Union[None, pandas.DataFrame]:
     '''
     Main function that handles filling a column of the "main_table" arg
     based on data matched from the "reference_table" arg.
@@ -161,7 +161,7 @@ def file_lookup(column_to_fill, main_file, reference_file) -> None:
         print('Error!  Reference file must be .csv or .xlsx!')
 
 
-    pylookup(column_to_fill, main_df, ref_df, inplace=True)
+    pylookup(column_to_fill, ref_df, main_df, inplace=True)
 
     if '.xl' in main_file:
         main_df.to_excel(main_file, index=False)
