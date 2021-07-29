@@ -99,8 +99,12 @@ def column_check(column, table) -> str:
     if closest[1] > 90:
         print(f'Column {column} matched to {closest[0]}')
         return closest[0]
-    else:
-        return ''
+    # if above didn't match, try inverting the capitalization of column
+    closest = process.extract(column.swapcase(), table.columns, limit=1)[0]
+    if closest[1] > 90:
+        print(f'Column {column} matched to {closest[0]}')
+        return closest[0]
+    return ''
 
 
 def matchable_columns(main_table, reference_table, main_cols_for_matching) -> dict:
@@ -142,9 +146,9 @@ def matchable_columns(main_table, reference_table, main_cols_for_matching) -> di
 
 @click.command()
 @click.argument('column_to_fill')
-@click.argument('main_file')
 @click.argument('reference_file')
-def file_lookup(column_to_fill, main_file, reference_file) -> None:
+@click.argument('main_file')
+def file_lookup(column_to_fill, reference_file, main_file) -> None:
 
     if '.xl' in main_file:
         main_df = pandas.read_excel(main_file)
