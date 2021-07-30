@@ -20,14 +20,24 @@ def pylookup(column_to_fill: str, reference_table, main_table, *args, force_name
 
     For initial development, assuming tables are provided as Pandas DataFrames.
     Ideally extend to other non-pandas data formats in the future.
+
+    First column_to_fill argument is CASE INSENSITIVE!
     '''
+    ref_cols = reference_table.columns
+    if column_to_fill not in ref_cols:
+        if column_to_fill.lower() in [col.lower() for col in ref_cols]:
+            column_to_fill = [col for col in ref_cols if col.lower() == column_to_fill.lower()][0]
+        else:
+            print('\n - Error!  Column ' + column_to_fill + ' not found! -\n')
+            return None
+
     # check if column is in main
     closest_column = column_check(column_to_fill, main_table) if not force_name else column_to_fill
 
     # check for reference columns that can link with other columns in main
     main_col_matches = matchable_columns(main_table, reference_table, main_cols_for_matching)
 
-    print('Populating column...')
+    print('Populating column: ' + column_to_fill)
     # pre-loaded dictionary of sets for reference columns avoids .tolist() more than once
     reference_column_values = {ref_col: [str(x) for x in reference_table[ref_col].tolist()] for ref_col in reference_table.columns}
     # iterate over main and set value of column_to_fill based on best match from reference

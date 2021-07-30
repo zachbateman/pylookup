@@ -13,7 +13,7 @@ class TestLookup(unittest.TestCase):
 
         print(main)
         main = pylookup.pylookup('TYPE', reference, main)
-        main = pylookup.pylookup('ANIMAL2', reference, main, force_name=True)
+        main = pylookup.pylookup('ANImal2', reference, main, force_name=True)
         print(main)
 
         self.assertTrue('TYPE' in main.columns and 'ANIMAL2' in main.columns)
